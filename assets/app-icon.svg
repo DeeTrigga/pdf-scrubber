@@ -1,0 +1,29 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="248" fill="#2563eb" />
+  <circle cx="256" cy="256" r="236" fill="#3b82f6" />
+  
+  <!-- Document Stack -->
+  <g transform="translate(128, 96)">
+    <!-- Back Document -->
+    <rect x="20" y="20" width="200" height="260" rx="12" fill="#e5e7eb" />
+    <!-- Middle Document -->
+    <rect x="10" y="10" width="200" height="260" rx="12" fill="#f3f4f6" />
+    <!-- Front Document -->
+    <rect x="0" y="0" width="200" height="260" rx="12" fill="#ffffff" />
+    
+    <!-- Document Lines -->
+    <g fill="#94a3b8">
+      <rect x="30" y="60" width="140" height="8" rx="4" />
+      <rect x="30" y="90" width="100" height="8" rx="4" />
+      <rect x="30" y="120" width="120" height="8" rx="4" />
+    </g>
+    
+    <!-- Magic Wand -->
+    <g transform="translate(140, 180) rotate(-45)">
+      <rect x="0" y="0" width="80" height="16" rx="8" fill="#fde047" />
+      <polygon points="80,8 100,0 100,16" fill="#fde047" />
+      <circle cx="8" cy="8" r="8" fill="#facc15" />
+    </g>
+  </g>
+</svg>

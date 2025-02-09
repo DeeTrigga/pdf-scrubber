@@ -1,0 +1,57 @@
+{
+    "name": "pdf-scrubber",
+    "version": "1.0.0",
+    "main": "dist-electron/main.js",
+    "scripts": {
+        "dev": "concurrently \"npm run dev:electron\" \"npm run dev:renderer\"",
+        "dev:electron": "tsc -p electron/tsconfig.json --watch",
+        "dev:renderer": "vite",
+        "build": "tsc && vite build",
+        "build:electron": "tsc -p electron/tsconfig.json",
+        "pack": "npm run build && npm run build:electron && electron-builder",
+        "preview": "vite preview"
+    },
+    "build": {
+        "appId": "com.pdfscrubber.app",
+        "productName": "PDF Scrubber",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "dist/**/*",
+            "dist-electron/**/*"
+        ],
+        "win": {
+            "target": [
+                "portable"
+            ]
+        }
+    },
+    "dependencies": {
+        "@radix-ui/react-alert-dialog": "^1.0.5",
+        "lucide-react": "^0.263.1",
+        "pdf-parse": "^1.1.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tailwindcss-animate": "^1.0.7"
+    },
+    "devDependencies": {
+        "@radix-ui/react-progress": "^1.1.2",
+        "@types/node": "^20.11.0",
+        "@types/react": "^18.2.48",
+        "@types/react-dom": "^18.2.18",
+        "@vitejs/plugin-react": "^4.2.1",
+        "autoprefixer": "^10.4.17",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "concurrently": "^8.2.2",
+        "electron": "^25.9.8",
+        "electron-builder": "^25.1.8",
+        "postcss": "^8.4.33",
+        "tailwind-merge": "^3.0.1",
+        "tailwindcss": "^3.4.1",
+        "tsc": "^2.0.4",
+        "typescript": "^5.7.3",
+        "vite": "^5.0.12"
+    }
+}
