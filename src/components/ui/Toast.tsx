@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CheckCircle, XCircle, AlertCircle, X } from "lucide-react";
+import { CheckCircle, CircleX, AlertCircle, X } from "lucide-react";
 
 export type ToastType = "success" | "error" | "warning";
 
@@ -20,7 +20,7 @@ const ToastIcon: React.FC<{ type: ToastType }> = ({ type }) => {
     case "success":
       return <CheckCircle className="h-5 w-5 text-green-500" />;
     case "error":
-      return <XCircle className="h-5 w-5 text-red-500" />;
+      return <CircleX className="h-5 w-5 text-red-500" />;
     case "warning":
       return <AlertCircle className="h-5 w-5 text-yellow-500" />;
   }

@@ -1,5 +1,4 @@
-import { ExtractedMetadata } from '../types';
-import * as path from 'path';
+import { ExtractedMetadata } from '../types/index';
 
 export function extractMetadata(text: string, filePath: string): ExtractedMetadata {
   // PDF processing logic here

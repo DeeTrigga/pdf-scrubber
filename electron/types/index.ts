@@ -17,7 +17,16 @@ export interface FileProcessingError {
 
 export type ProcessingStatus = 'idle' | 'processing' | 'complete' | 'error';
 
+export interface ExtractedMetadata {
+  company: string;
+  type: string;
+  date: string;
+  assumed: boolean;
+}
 export interface ProcessingResult {
-  status: ProcessingStatus;
+  original: string;
+  extracted: ExtractedMetadata;
+  newName: string;
+  success: boolean;
   error?: string;
 }

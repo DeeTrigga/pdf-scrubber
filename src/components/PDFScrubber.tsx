@@ -2,15 +2,29 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Alert, AlertDescription } from './ui/Alert';
 import { Progress } from './ui/Progress';
 import { FileSearch, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
-import { ProcessedResult, ProcessingState, Toast as ToastType } from '../types';
+import { ProcessingResult, ProcessingState, Toast as ToastType } from '../../electron/types';
+import { PDFResult } from '../index';
+
+  declare global {
+  interface Window {
+    ElectronAPI: {
+      selectFolder: () => Promise<{ path: string; pdfCount: number }>;
+      processPDFs: (path: string) => Promise<ProcessingResult[]>;
+      confirmRename: (args: { folderPath: string; oldName: string; newName: string }) => Promise<void>;
+    };
+  }
+}
 import { Toast } from './ui/Toast';
+
+// Ensure TypeScript recognizes the global window object
+declare const window: Window & typeof globalThis;
 import { ResultSkeleton } from './ui/Skeleton';
 import { v4 as uuidv4 } from 'uuid';
 
 const PDFScrubber: React.FC = () => {
   const [selectedPath, setSelectedPath] = useState<string>('');
   const [pdfCount, setPdfCount] = useState<number>(0);
-  const [results, setResults] = useState<ProcessedResult[]>([]);
+  const [results, setResults] = useState<ProcessingResult[]>([]);
   const [processing, setProcessing] = useState<ProcessingState>({
     isProcessing: false,
     currentFile: '',

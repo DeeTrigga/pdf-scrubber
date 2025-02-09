@@ -1,8 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from './utils/test-utils';
+import { mockElectron, render, screen, fireEvent, waitFor, act } from './utils/test-utils';
 import userEvent from '@testing-library/user-event';
 import PDFScrubber from '../components/PDFScrubber';
-import { mockElectron } from './utils/test-utils';
 
 describe('PDFScrubber', () => {
   beforeEach(() => {

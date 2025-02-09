@@ -17,6 +17,8 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "types": [
+      "jest",
+      "node",
       "vite/client"
     ]
   },
@@ -25,7 +27,7 @@
   ],
   "references": [
     {
-      "path": "./tsconfig.node.json"
+      "path": "../tsconfig.node.json"
     }
   ]
 }
