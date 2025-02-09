@@ -1,31 +1,30 @@
 {
   "compilerOptions": {
+    "jsx": "react",
+    "composite": true,
     "target": "ESNext",
     "lib": [
-      "DOM",
-      "DOM.Iterable",
       "ESNext"
     ],
     "module": "ESNext",
-    "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "types": [
-      "vite/client"
-    ]
+    "noEmit": false,
+    "types": ["vite/client", "node"],
   },
   "include": [
+    "vite.config.ts", 
+    "electron",
     "src"
   ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
+  "exclude": [
+    "dist",
+    "node_modules"
   ]
 }

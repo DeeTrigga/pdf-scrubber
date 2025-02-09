@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoadingButton } from '../ui/LoadingStates';
+import { LoadingButton } from '../LoadingStates';
 
 interface ControlsProps {
     onSelectFolder: () => void;

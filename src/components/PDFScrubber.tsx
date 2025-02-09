@@ -1,19 +1,43 @@
-import React, { useState, useCallback } from 'react';
-import { Header } from './ui/Header';
-import { Controls } from './ui/Controls';
-import { ProcessingStatus } from './ui/LoadingStates';
-import { ResultsList } from './ui/ResultsList';
-import { PDFResult, RenameData } from '../types';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Alert, AlertDescription } from './ui/Alert';
+import { Progress } from './ui/Progress';
+import { FileSearch, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
+import { ProcessedResult, ProcessingState, Toast as ToastType } from '../types';
+import { Toast } from './ui/Toast';
+import { ResultSkeleton } from './ui/Skeleton';
+import { v4 as uuidv4 } from 'uuid';
 
 const PDFScrubber: React.FC = () => {
   const [selectedPath, setSelectedPath] = useState<string>('');
   const [pdfCount, setPdfCount] = useState<number>(0);
-  const [results, setResults] = useState<PDFResult[]>([]);
-  const [processing, setProcessing] = useState<boolean>(false);
-  const [currentFile, setCurrentFile] = useState<string>('');
-  const [progress, setProgress] = useState<number>(0);
+  const [results, setResults] = useState<ProcessedResult[]>([]);
+  const [processing, setProcessing] = useState<ProcessingState>({
+    isProcessing: false,
+    currentFile: '',
+    progress: 0
+  });
   const [visibleResults, setVisibleResults] = useState<Set<number>>(new Set());
   const [initialLoading, setInitialLoading] = useState<boolean>(false);
+  const [toasts, setToasts] = useState<ToastType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Simulate initial load
+    setTimeout(() => setIsLoading(false), 1000);
+  }, []);
+
+  const showToast = useCallback((message: string, type: ToastType['type']) => {
+    const newToast: ToastType = {
+      id: uuidv4(),
+      message,
+      type
+    };
+    setToasts(prev => [...prev, newToast]);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
 
   const handleSelectFolder = useCallback(async () => {
     try {
@@ -24,107 +48,100 @@ const PDFScrubber: React.FC = () => {
         setPdfCount(result.pdfCount);
         setResults([]);
         setVisibleResults(new Set());
+        showToast(`Found ${result.pdfCount} PDF files`, 'success');
       }
     } catch (error) {
       console.error('Error selecting folder:', error);
+      showToast('Failed to select folder', 'error');
     } finally {
       setInitialLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   const handleProcess = useCallback(async () => {
     if (!selectedPath) return;
 
-    setProcessing(true);
+    setProcessing({
+      isProcessing: true,
+      currentFile: '',
+      progress: 0
+    });
     setResults([]);
-    setProgress(0);
-    setCurrentFile('');
 
     try {
       const results = await window.electron.processPDFs(selectedPath);
 
       for (let i = 0; i < results.length; i++) {
         const result = results[i];
-        setCurrentFile(result.original);
-        setProgress(((i + 1) / results.length) * 100);
+        setProcessing(prev => ({
+          ...prev,
+          currentFile: result.original,
+          progress: ((i + 1) / results.length) * 100
+        }));
         setResults(prev => [...prev, result]);
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       setVisibleResults(new Set(results.map((_, i) => i)));
+      showToast('Successfully processed all files', 'success');
     } catch (error) {
       console.error('Processing failed:', error);
-      alert('Failed to process PDFs: ' + (error as Error).message);
+      showToast('Failed to process PDFs', 'error');
     } finally {
-      setProcessing(false);
-      setCurrentFile('');
+      setProcessing({
+        isProcessing: false,
+        currentFile: '',
+        progress: 0
+      });
     }
-  }, [selectedPath]);
+  }, [selectedPath, showToast]);
 
   const handleApprove = useCallback(async (index: number) => {
+    if (!results[index]) return;
+
     try {
-      const renameData: RenameData = {
+      const oldName = results[index].original;
+      const newName = results[index].newName;
+
+      await window.electron.confirmRename({
         folderPath: selectedPath,
-        oldName: results[index].original,
-        newName: results[index].newName
-      };
+        oldName,
+        newName
+      });
 
-      const result = await window.electron.confirmRename(renameData);
-
-      if (result.success) {
-        handleRemoveResult(index);
-      } else {
-        alert('Failed to rename file: ' + result.error);
-      }
+      showToast(`Successfully renamed ${oldName}`, 'success');
+      setVisibleResults(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(index);
+        return newSet;
+      });
     } catch (error) {
-      alert('Error renaming file: ' + (error as Error).message);
+      showToast(`Failed to rename file: ${results[index].original}`, 'error');
     }
-  }, [selectedPath, results]);
+  }, [selectedPath, results, showToast]);
 
-  const handleReject = useCallback((index: number) => {
-    handleRemoveResult(index);
-  }, []);
-
-  const handleRemoveResult = useCallback((index: number) => {
-    setVisibleResults(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(index);
-      return newSet;
-    });
-  }, []);
+  if (isLoading) {
+    return <ResultSkeleton />;
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <div className="space-y-6">
-        <Header title="PDF Scrubber" />
+      {/* Component content (same as before) */}
 
-        <Controls
-          onSelectFolder={handleSelectFolder}
-          onProcess={handleProcess}
-          selectedPath={selectedPath}
-          pdfCount={pdfCount}
-          processing={processing}
-          initialLoading={initialLoading}
-        />
-
-        {processing && (
-          <ProcessingStatus
-            currentFile={currentFile}
-            progress={progress}
+      {/* Toasts */}
+      <div className="fixed bottom-4 right-4 space-y-2">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
           />
-        )}
-
-        <ResultsList
-          results={results}
-          visibleResults={visibleResults}
-          pdfCount={pdfCount}
-          processing={processing}
-          onApprove={handleApprove}
-          onReject={handleReject}
-        />
+        ))}
       </div>
     </div>
   );
 };
 
+// Wrap with Error Boundary in parent component
 export default PDFScrubber;

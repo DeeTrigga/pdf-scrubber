@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>PDF Scrubber</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .fade-out {
+            transition: opacity 0.5s ease-out, height 0.5s ease-out 0.5s;
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .processing-item {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .results-container {
+            transition: all 0.3s ease-in-out;
+        }
+
+        #progressBar {
+            width: 0%;
+        }
+
+        .best-guess {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div class="min-h-screen p-6">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="flex items-center gap-3 mb-8">
+                <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h1 class="text-2xl font-bold text-gray-900">PDF Scrubber</h1>
+            </div>
+
+            <!-- Controls -->
+            <div class="space-y-4 mb-8">
+                <div class="flex items-center gap-4">
+                    <button id="selectFolder"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Select Folder
+                    </button>
+                    <span id="folderPath" class="text-gray-600"></span>
+                </div>
+
+                <button id="processButton"
+                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                    Start Processing
+                </button>
+            </div>
+
+            <!-- Processing Status -->
+            <div id="processingStatus" class="hidden mb-8 p-4 bg-white rounded-lg shadow">
+                <div class="flex items-center gap-2 mb-3">
+                    <div id="progressBar" class="bg-blue-500 h-2.5 rounded-full"></div>
+                    <span id="currentFile" class="text-gray-700"></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progressBar" class="bg-blue-500 h-2.5 rounded-full"></div>
+                </div>
+                <div class="mt-2 text-sm text-gray-500">
+                    <span id="progressText">0%</span> complete
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="results" class="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
+                <!-- Results will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFolderPath = '';
+        let processingComplete = false;
+
+        // DOM Elements
+        const selectFolderBtn = document.getElementById('selectFolder');
+        const processButton = document.getElementById('processButton');
+        const folderPathSpan = document.getElementById('folderPath');
+        const processingStatus = document.getElementById('processingStatus');
+        const currentFileSpan = document.getElementById('currentFile');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const resultsContainer = document.getElementById('results');
+
+        // Event Listeners
+        selectFolderBtn.addEventListener('click', handleSelectFolder);
+        processButton.addEventListener('click', handleProcess);
+
+        async function handleSelectFolder() {
+            const result = await window.electron.selectFolder();
+            if (result) {
+                currentFolderPath = result.path;
+                folderPathSpan.textContent = `${result.path} (${result.pdfCount} PDFs found)`;
+                processButton.disabled = false;
+            }
+        }
+
+        async function handleProcess() {
+            if (!currentFolderPath) return;
+
+            // Reset and show processing status
+            resultsContainer.innerHTML = '';
+            processingStatus.classList.remove('hidden');
+            selectFolderBtn.disabled = true;
+            processButton.disabled = true;
+
+            try {
+                const results = await window.electron.processPDFs(currentFolderPath);
+                displayResults(results);
+            } catch (error) {
+                console.error('Processing failed:', error);
+                alert('Failed to process PDFs: ' + error.message);
+            } finally {
+                processingStatus.classList.add('hidden');
+                selectFolderBtn.disabled = false;
+                processButton.disabled = false;
+            }
+        }
+
+        function displayResults(results) {
+            const container = document.createElement('div');
+            container.className = 'space-y-3';
+
+            results.forEach((result, index) => {
+                const resultElement = createResultElement(result, index);
+                container.appendChild(resultElement);
+            });
+
+            resultsContainer.appendChild(container);
+        }
+
+        function createResultElement(result, index) {
+            const div = document.createElement('div');
+            div.className = 'processing-item bg-white rounded-lg shadow p-4';
+            div.id = `result-${index}`;
+
+            const content = `
+                <div class="flex justify-between items-start">
+                    <div class="flex-grow">
+                        <div class="font-medium text-gray-900">Original: ${result.original}</div>
+                        <div class="text-sm text-gray-600 mt-1">
+                            Extracted: ${result.extracted.company} | ${result.extracted.type} | ${result.extracted.date}
+                        </div>
+                        <div class="text-sm font-medium ${result.extracted.assumed ? 'text-yellow-600' : 'text-green-600'} mt-1">
+                            → ${result.newName}
+                            ${result.extracted.assumed ? '<span class="ml-2 text-xs bg-yellow-100 px-2 py-1 rounded">Best guess</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="flex gap-2 ml-4">
+                        <button onclick="handleApprove(${index})" class="p-2 hover:bg-green-100 rounded-full transition-colors">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3" />
+                            </svg>
+                        </button>
+                        <button onclick="handleReject(${index})" class="p-2 hover:bg-red-100 rounded-full transition-colors">
+                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            div.innerHTML = content;
+            return div;
+        }
+
+        async function handleApprove(index) {
+            const resultElement = document.getElementById(`result-${index}`);
+            try {
+                const result = await window.electron.confirmRename({
+                    folderPath: currentFolderPath,
+                    oldName: results[index].original,
+                    newName: results[index].newName
+                });
+
+                if (result.success) {
+                    fadeOutAndRemove(resultElement);
+                } else {
+                    alert('Failed to rename file: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error renaming file: ' + error.message);
+            }
+        }
+
+        function handleReject(index) {
+            const resultElement = document.getElementById(`result-${index}`);
+            fadeOutAndRemove(resultElement);
+        }
+
+        function fadeOutAndRemove(element) {
+            element.classList.add('fade-out');
+            setTimeout(() => {
+                element.remove();
+            }, 1000);
+        }
+
+        // Update progress
+        function updateProgress(current, total) {
+            const percent = Math.round((current / total) * 100);
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `${percent}%`;
+        }
+    </script>
+</body>
+
+</html>

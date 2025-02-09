@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, AlertDescription } from './Alert';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
-import { PDFResult } from '../../types';
+import { PDFResult } from '../../../src/index';
 
 interface ResultItemProps {
     result: PDFResult;

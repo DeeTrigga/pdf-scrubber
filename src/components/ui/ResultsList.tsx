@@ -1,7 +1,7 @@
 import React from 'react';
 import { ResultItem } from './ResultItem';
-import { LoadingResults } from './LoadingStates';
-import { PDFResult } from '../../types';
+import { LoadingResults } from '../LoadingStates';
+import { PDFResult } from '../../../src/index';
 
 interface ResultsListProps {
   results: PDFResult[];

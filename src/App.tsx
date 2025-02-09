@@ -1,12 +1,10 @@
-import React from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import PDFScrubber from './components/PDFScrubber';
 
 function App() {
     return (
-        <div className="min-h-screen bg-background">
+        <ErrorBoundary>
             <PDFScrubber />
-        </div>
+        </ErrorBoundary>
     );
 }
-
-export default App;
