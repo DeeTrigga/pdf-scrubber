@@ -1,9 +1,5 @@
-import React from 'react';
-import { render as finalRender, screen, waitFor, act } from '@testing-library/react';
-import 'jest-globals';
-import PDFScrubber from '../../components/PDFScrubber';
+import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { mockElectron } from '../utils/test-utils';
 
 // Mock data for integration tests
@@ -221,3 +217,7 @@ describe('PDF Processing Integration', () => {
         });
     });
 });
+
+function act(arg0: () => Promise<void>) {
+    throw new Error('Function not implemented.');
+}

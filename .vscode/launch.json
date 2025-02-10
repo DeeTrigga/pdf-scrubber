@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Launch",
+            "type": "node",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/app.ts"
+        }
+    ],
+    "compounds": [],
+    "version": "0.2.0",
+    "inputs": []
+}

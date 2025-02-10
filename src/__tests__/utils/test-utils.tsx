@@ -1,9 +1,4 @@
 import React from 'react';
-declare global {
-  interface Window {
-    Electron: typeof mockElectron;
-  }
-}
 import { render, RenderOptions } from '@testing-library/react';
 
 // Mock the electron global

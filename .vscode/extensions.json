@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "vector-of-bool.cmake-tools",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "tamasfe.even-better-toml",
+        "esbenp.prettier-vscode"
+    ],
+    "unwantedRecommendations": []
+}

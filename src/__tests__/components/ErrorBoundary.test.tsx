@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 
 // Component that throws an error
-const ThrowError: React.FC<{ shouldThrow?: boolean }> = ({ shouldThrow = true }) => {
+const ThrowError = ({ shouldThrow = true }) => {
   if (shouldThrow) {
     throw new Error('Test error');
   }

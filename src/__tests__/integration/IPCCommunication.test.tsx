@@ -1,10 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Jest from 'jest';
-import { render as finalRender, screen, waitFor, act } from '@testing-library/react';
+import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import PDFScrubber from '../../components/PDFScrubber';
 import { mockElectron } from '../utils/test-utils';
+import '@testing-library/jest-dom'
 
 describe('IPC Communication Integration', () => {
   beforeEach(() => {

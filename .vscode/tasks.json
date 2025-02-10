@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+        "label": "build",
+        "type": "shell",
+        "command": "cargo",
+        "args": [
+            "build",
+            "--bin",
+            "cobalt"
+        ],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        },
+        "problemMatcher": ["$tsc"],
+        "detail": "Generated task by Cobalt."
+        }
+    ],
+    "inputs": []
+}
